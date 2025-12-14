@@ -2,19 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const path = require('path');
 
 dotenv.config();
 
 const app = express();
 
 /* ----------------------- CORS CONFIG ----------------------- */
-/*
-  Works for:
-  ✔ Hostinger frontend (https://yourdomain.com)
-  ✔ Render backend
-  ✔ Localhost testing
-*/
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
@@ -35,7 +28,6 @@ app.use(cors({
 
 /* ----------------------- MIDDLEWARE ----------------------- */
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 /* ----------------------- TEST ROUTE ----------------------- */
 app.get("/", (req, res) => {

@@ -1,23 +1,22 @@
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
+const cloudinary = require('cloudinary').v2;
 const Gallery = require('../models/Gallery');
 const authMiddleware = require('../middleware/auth');
+
 const router = express.Router();
 
-// Configure multer for file upload
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
+/* ---------------- CLOUDINARY CONFIG ---------------- */
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET
 });
 
-const upload = multer({ storage });
+/* ---------------- MULTER (MEMORY STORAGE) ---------------- */
+const upload = multer({ storage: multer.memoryStorage() });
 
-// Get all gallery items
+/* ---------------- GET ALL GALLERY ---------------- */
 router.get('/', async (req, res) => {
   try {
     const gallery = await Gallery.find().sort({ createdAt: -1 });
@@ -27,37 +26,51 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Protected routes
+/* ---------------- PROTECTED ROUTES ---------------- */
 router.use(authMiddleware);
 
-// Create gallery item
+/* ---------------- CREATE GALLERY ---------------- */
 router.post('/', upload.single('image'), async (req, res) => {
   try {
     const { title, description, category } = req.body;
-    const imageUrl = `/uploads/${req.file.filename}`;
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'Image required' });
+    }
+
+    const uploadResult = await cloudinary.uploader.upload(
+      `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
+      { folder: "gallery" }
+    );
 
     const galleryItem = new Gallery({
       title,
       description,
-      imageUrl,
-      category
+      category,
+      imageUrl: uploadResult.secure_url
     });
 
     await galleryItem.save();
     res.status(201).json(galleryItem);
+
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Update gallery item
+/* ---------------- UPDATE GALLERY ---------------- */
 router.put('/:id', upload.single('image'), async (req, res) => {
   try {
     const { title, description, category } = req.body;
     const updateData = { title, description, category };
 
     if (req.file) {
-      updateData.imageUrl = `/uploads/${req.file.filename}`;
+      const uploadResult = await cloudinary.uploader.upload(
+        `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
+        { folder: "gallery" }
+      );
+      updateData.imageUrl = uploadResult.secure_url;
     }
 
     const galleryItem = await Gallery.findByIdAndUpdate(
@@ -76,16 +89,22 @@ router.put('/:id', upload.single('image'), async (req, res) => {
   }
 });
 
-// Delete gallery item
+/* ---------------- DELETE GALLERY ---------------- */
 router.delete('/:id', async (req, res) => {
   try {
-    const galleryItem = await Gallery.findByIdAndDelete(req.params.id);
-    
+    const galleryItem = await Gallery.findById(req.params.id);
+
     if (!galleryItem) {
       return res.status(404).json({ error: 'Gallery item not found' });
     }
 
+    // Extract Cloudinary public_id
+    const publicId = galleryItem.imageUrl.split('/').pop().split('.')[0];
+    await cloudinary.uploader.destroy(`gallery/${publicId}`);
+
+    await galleryItem.deleteOne();
     res.json({ message: 'Gallery item deleted successfully' });
+
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
