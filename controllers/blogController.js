@@ -4,6 +4,9 @@ const Blog = require("../models/Blog");
 
 exports.createBlog = async (req, res) => {
   try {
+    console.log("Request body:", req.body);
+    console.log("Request file:", req.file);
+
     const { title, description } = req.body;
 
     if (!title || !description) {
@@ -12,14 +15,11 @@ exports.createBlog = async (req, res) => {
       });
     }
 
-    // Handle image from file upload or URL
+    // Handle image from file upload
     let imageUrl = "";
     if (req.file) {
-      // If file was uploaded via multer
       imageUrl = `/uploads/${req.file.filename}`;
-    } else if (req.body.image) {
-      // If image URL was provided
-      imageUrl = req.body.image;
+      console.log("Image saved at:", imageUrl);
     }
 
     const blog = new Blog({
@@ -29,11 +29,16 @@ exports.createBlog = async (req, res) => {
     });
 
     const savedBlog = await blog.save();
+    console.log("Blog saved successfully:", savedBlog._id);
+    
     res.status(201).json(savedBlog);
 
   } catch (error) {
     console.error("Create Blog Error:", error);
-    res.status(500).json({ message: "Server error while creating blog" });
+    res.status(500).json({ 
+      message: "Server error while creating blog",
+      error: error.message 
+    });
   }
 };
 
@@ -45,7 +50,10 @@ exports.getBlogs = async (req, res) => {
     res.json(blogs);
   } catch (error) {
     console.error("Get Blogs Error:", error);
-    res.status(500).json({ message: "Server error while fetching blogs" });
+    res.status(500).json({ 
+      message: "Server error while fetching blogs",
+      error: error.message 
+    });
   }
 };
 
@@ -60,7 +68,10 @@ exports.getBlogById = async (req, res) => {
     res.json(blog);
   } catch (error) {
     console.error("Get Blog Error:", error);
-    res.status(500).json({ message: "Server error while fetching blog" });
+    res.status(500).json({ 
+      message: "Server error while fetching blog",
+      error: error.message 
+    });
   }
 };
 
@@ -68,7 +79,13 @@ exports.getBlogById = async (req, res) => {
 
 exports.updateBlog = async (req, res) => {
   try {
-    const updateData = { ...req.body };
+    console.log("Update request body:", req.body);
+    console.log("Update request file:", req.file);
+
+    const updateData = {
+      title: req.body.title,
+      description: req.body.description
+    };
     
     // Handle image update
     if (req.file) {
@@ -78,17 +95,21 @@ exports.updateBlog = async (req, res) => {
     const updated = await Blog.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (!updated) {
       return res.status(404).json({ message: "Blog not found" });
     }
 
+    console.log("Blog updated successfully:", updated._id);
     res.json(updated);
   } catch (error) {
     console.error("Update Blog Error:", error);
-    res.status(500).json({ message: "Server error while updating blog" });
+    res.status(500).json({ 
+      message: "Server error while updating blog",
+      error: error.message 
+    });
   }
 };
 
@@ -102,9 +123,13 @@ exports.deleteBlog = async (req, res) => {
       return res.status(404).json({ message: "Blog not found" });
     }
 
+    console.log("Blog deleted successfully:", req.params.id);
     res.json({ message: "Blog deleted successfully" });
   } catch (error) {
     console.error("Delete Blog Error:", error);
-    res.status(500).json({ message: "Server error while deleting blog" });
+    res.status(500).json({ 
+      message: "Server error while deleting blog",
+      error: error.message 
+    });
   }
 };
