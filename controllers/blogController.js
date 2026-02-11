@@ -1,77 +1,52 @@
 const Blog = require("../models/Blog");
 
-/* ================= CREATE ================= */
+/* ================= CREATE BLOG ================= */
 
 exports.createBlog = async (req, res) => {
   try {
-    console.log("Request body:", req.body);
-    console.log("Request file:", req.file);
+    console.log("CREATE BODY:", req.body);
+    console.log("CREATE FILE:", req.file);
 
     const { title, description } = req.body;
 
     if (!title || !description) {
-      return res.status(400).json({
-        message: "Title and description are required",
-      });
+      return res.status(400).json({ message: "Title and description required" });
     }
 
-    // Handle image from file upload
-    let imageUrl = "";
+    let image = "";
+
     if (req.file) {
-      imageUrl = `/uploads/${req.file.filename}`;
-      console.log("Image saved at:", imageUrl);
+      image = `/uploads/${req.file.filename}`;
     }
 
-    const blog = new Blog({
+    const blog = await Blog.create({
       title,
       description,
-      image: imageUrl,
+      image
     });
 
-    const savedBlog = await blog.save();
-    console.log("Blog saved successfully:", savedBlog._id);
-    
-    res.status(201).json(savedBlog);
+    console.log("BLOG CREATED:", blog._id);
 
-  } catch (error) {
-    console.error("Create Blog Error:", error);
-    res.status(500).json({ 
-      message: "Server error while creating blog",
-      error: error.message 
-    });
+    res.status(201).json(blog);
+
+  } catch (err) {
+    console.error("CREATE BLOG ERROR:", err);
+    res.status(500).json({ message: err.message });
   }
 };
 
-/* ================= GET ALL ================= */
+/* ================= GET BLOGS ================= */
 
 exports.getBlogs = async (req, res) => {
   try {
     const blogs = await Blog.find().sort({ createdAt: -1 });
+
+    console.log("BLOGS FETCHED:", blogs.length);
+
     res.json(blogs);
-  } catch (error) {
-    console.error("Get Blogs Error:", error);
-    res.status(500).json({ 
-      message: "Server error while fetching blogs",
-      error: error.message 
-    });
-  }
-};
-
-/* ================= GET SINGLE BLOG ================= */
-
-exports.getBlogById = async (req, res) => {
-  try {
-    const blog = await Blog.findById(req.params.id);
-    if (!blog) {
-      return res.status(404).json({ message: "Blog not found" });
-    }
-    res.json(blog);
-  } catch (error) {
-    console.error("Get Blog Error:", error);
-    res.status(500).json({ 
-      message: "Server error while fetching blog",
-      error: error.message 
-    });
+  } catch (err) {
+    console.error("GET BLOG ERROR:", err);
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -79,37 +54,26 @@ exports.getBlogById = async (req, res) => {
 
 exports.updateBlog = async (req, res) => {
   try {
-    console.log("Update request body:", req.body);
-    console.log("Update request file:", req.file);
-
-    const updateData = {
+    const update = {
       title: req.body.title,
       description: req.body.description
     };
-    
-    // Handle image update
+
     if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
+      update.image = `/uploads/${req.file.filename}`;
     }
 
-    const updated = await Blog.findByIdAndUpdate(
+    const blog = await Blog.findByIdAndUpdate(
       req.params.id,
-      updateData,
-      { new: true, runValidators: true }
+      update,
+      { new: true }
     );
 
-    if (!updated) {
-      return res.status(404).json({ message: "Blog not found" });
-    }
+    res.json(blog);
 
-    console.log("Blog updated successfully:", updated._id);
-    res.json(updated);
-  } catch (error) {
-    console.error("Update Blog Error:", error);
-    res.status(500).json({ 
-      message: "Server error while updating blog",
-      error: error.message 
-    });
+  } catch (err) {
+    console.error("UPDATE ERROR:", err);
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -117,19 +81,10 @@ exports.updateBlog = async (req, res) => {
 
 exports.deleteBlog = async (req, res) => {
   try {
-    const deleted = await Blog.findByIdAndDelete(req.params.id);
-
-    if (!deleted) {
-      return res.status(404).json({ message: "Blog not found" });
-    }
-
-    console.log("Blog deleted successfully:", req.params.id);
-    res.json({ message: "Blog deleted successfully" });
-  } catch (error) {
-    console.error("Delete Blog Error:", error);
-    res.status(500).json({ 
-      message: "Server error while deleting blog",
-      error: error.message 
-    });
+    await Blog.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    console.error("DELETE ERROR:", err);
+    res.status(500).json({ message: err.message });
   }
 };
