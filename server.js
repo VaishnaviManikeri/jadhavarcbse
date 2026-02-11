@@ -3,10 +3,17 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
+const fs = require("fs");
 
 dotenv.config();
 
 const app = express();
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 /* =========================
    SIMPLE RENDER SAFE CORS
@@ -25,6 +32,7 @@ app.use(
 ========================= */
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 /* =========================
@@ -53,6 +61,15 @@ app.use("/api/gallery", require("./routes/gallery"));
 app.use("/api/announcements", require("./routes/announcements"));
 app.use("/api/careers", require("./routes/careers"));
 app.use("/api/blogs", require("./routes/blogs"));
+
+/* =========================
+   ERROR HANDLING
+========================= */
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: err.message || "Something went wrong!" });
+});
 
 /* =========================
    SERVER
