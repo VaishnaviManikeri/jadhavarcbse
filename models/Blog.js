@@ -18,24 +18,25 @@ const blogSchema = new mongoose.Schema({
   },
   excerpt: {
     type: String,
-    trim: true,
+    required: true,
     maxlength: 200
-  },
-  author: {
-    type: String,
-    default: 'Admin'
   },
   featuredImage: {
     type: String,
     default: ''
   },
+  author: {
+    type: String,
+    default: 'Admin'
+  },
+  tags: [{
+    type: String,
+    trim: true
+  }],
   category: {
     type: String,
     default: 'General'
   },
-  tags: [{
-    type: String
-  }],
   isPublished: {
     type: Boolean,
     default: true
@@ -43,16 +44,12 @@ const blogSchema = new mongoose.Schema({
   views: {
     type: Number,
     default: 0
-  },
-  readTime: {
-    type: Number,
-    default: 3
   }
 }, {
   timestamps: true
 });
 
-// Create slug from title before saving
+// Generate slug from title before saving
 blogSchema.pre('save', function(next) {
   if (this.isModified('title')) {
     this.slug = this.title
