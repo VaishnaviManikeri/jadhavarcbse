@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use(cors({
 
 /* ----------------------- MIDDLEWARE ----------------------- */
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 /* ----------------------- TEST ROUTE ----------------------- */
 app.get("/", (req, res) => {
@@ -44,6 +46,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/gallery', require('./routes/gallery'));
 app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/careers', require('./routes/careers'));
+app.use('/api/blogs', require('./routes/blogs')); // Add this line
 
 /* ----------------------- SERVER ----------------------- */
 const PORT = process.env.PORT || 5000;
