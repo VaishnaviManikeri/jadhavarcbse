@@ -6,8 +6,12 @@ exports.createBlog = async (req, res) => {
   try {
     const { title, description } = req.body;
 
-    if (!title || !description)
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+
+    if (!title || !description) {
       return res.status(400).json({ message: "Missing fields" });
+    }
 
     let image = "";
 
@@ -15,17 +19,16 @@ exports.createBlog = async (req, res) => {
       image = `/uploads/${req.file.filename}`;
     }
 
-    const blog = new Blog({
+    const blog = await Blog.create({
       title,
       description,
       image
     });
 
-    await blog.save();
-
     res.status(201).json(blog);
+
   } catch (err) {
-    console.error(err);
+    console.error("BLOG CREATE ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 };
