@@ -32,11 +32,10 @@ app.use(
    MIDDLEWARE
 ========================= */
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files with correct path
-app.use("/uploads", express.static(uploadsDir));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 /* =========================
    ROOT ROUTE

@@ -5,7 +5,7 @@ const controller = require("../controllers/blogController");
 
 const storage = multer.diskStorage({
   destination: "uploads",
-  filename: (req, file, cb) => {
+  filename: (_, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   }
 });
