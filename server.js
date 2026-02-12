@@ -2,19 +2,10 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const path = require("path");
-const fs = require("fs");
 
 dotenv.config();
 
 const app = express();
-
-// Create uploads directory with absolute path
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-  console.log("✅ Uploads directory created at:", uploadsDir);
-}
 
 /* =========================
    CORS CONFIGURATION
@@ -22,9 +13,13 @@ if (!fs.existsSync(uploadsDir)) {
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:3000", "https://jadhavarcbse.onrender.com"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://jadhavarcbse.onrender.com"
+    ],
+    explain: true,
+    methods: ["GET", "POST", "PUT", "DELETE"]
   })
 );
 
@@ -34,9 +29,6 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Serve static files with correct path
-app.use("/uploads", express.static(uploadsDir));
 
 /* =========================
    ROOT ROUTE
@@ -63,7 +55,9 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/gallery", require("./routes/gallery"));
 app.use("/api/announcements", require("./routes/announcements"));
 app.use("/api/careers", require("./routes/careers"));
-app.use("/api/blogs", require("./routes/blogs"));
+app.use("/api/blog", require("./routes/blog"));
+
+/* ❌ BLOG ROUTE REMOVED */
 
 /* =========================
    ERROR HANDLING
@@ -71,9 +65,8 @@ app.use("/api/blogs", require("./routes/blogs"));
 
 app.use((err, req, res, next) => {
   console.error("Global error handler:", err);
-  res.status(500).json({ 
-    message: err.message || "Something went wrong!",
-    error: process.env.NODE_ENV === 'development' ? err.stack : {}
+  res.status(500).json({
+    message: err.message || "Something went wrong!"
   });
 });
 
@@ -85,5 +78,4 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📁 Uploads directory: ${uploadsDir}`);
 });
