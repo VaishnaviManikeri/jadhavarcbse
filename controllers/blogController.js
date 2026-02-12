@@ -1,9 +1,11 @@
 const Blog = require("../models/Blog");
 
-/* CREATE */
-
+/* ================= CREATE BLOG ================= */
 exports.createBlog = async (req, res) => {
   try {
+    console.log("CREATE BODY:", req.body);
+    console.log("CREATE FILE:", req.file);
+
     const { title, description } = req.body;
 
     if (!title || !description) {
@@ -13,8 +15,7 @@ exports.createBlog = async (req, res) => {
     let image = "";
 
     if (req.file) {
-      // Convert buffer to base64
-      image = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+      image = `/uploads/${req.file.filename}`;
     }
 
     const blog = await Blog.create({
@@ -23,40 +24,140 @@ exports.createBlog = async (req, res) => {
       image
     });
 
-    return res.status(201).json(blog);
+    console.log("BLOG CREATED:", blog._id);
+
+    res.status(201).json(blog);
 
   } catch (err) {
-    console.error("BLOG CREATE ERROR:", err);
-    return res.status(500).json({ message: err.message });
+    console.error("CREATE BLOG ERROR:", err);
+    res.status(500).json({ message: err.message });
   }
 };
 
-/* GET */
+/* ================= BULK CREATE BLOGS ================= */
+exports.bulkCreateBlogs = async (req, res) => {
+  try {
+    console.log("BULK CREATE BODY:", req.body);
+    console.log("BULK CREATE FILES:", req.files);
 
-exports.getBlogs = async (req,res)=>{
-  const blogs = await Blog.find().sort({createdAt:-1});
-  res.json(blogs);
-};
+    const { blogs } = req.body;
+    
+    if (!blogs || !Array.isArray(JSON.parse(blogs))) {
+      return res.status(400).json({ message: "Invalid blogs data format" });
+    }
 
-/* UPDATE */
+    const parsedBlogs = JSON.parse(blogs);
+    const createdBlogs = [];
 
-exports.updateBlog = async (req,res)=>{
-  const update={
-    title:req.body.title,
-    description:req.body.description
-  };
+    // Process each blog
+    for (let i = 0; i < parsedBlogs.length; i++) {
+      const blogData = parsedBlogs[i];
+      const { title, description, imageIndex } = blogData;
+      
+      if (!title || !description) {
+        console.log(`Skipping blog ${i}: Missing title or description`);
+        continue;
+      }
 
-  if(req.file){
-    update.image=`data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+      let image = "";
+
+      // Check if there's an image for this blog
+      if (req.files && req.files[imageIndex]) {
+        image = `/uploads/${req.files[imageIndex][0].filename}`;
+      }
+
+      const blog = await Blog.create({
+        title,
+        description,
+        image
+      });
+
+      createdBlogs.push(blog);
+      console.log(`BLOG CREATED ${i}:`, blog._id);
+    }
+
+    console.log(`TOTAL BLOGS CREATED: ${createdBlogs.length}`);
+
+    res.status(201).json({
+      message: `Successfully created ${createdBlogs.length} blogs`,
+      blogs: createdBlogs
+    });
+
+  } catch (err) {
+    console.error("BULK CREATE BLOG ERROR:", err);
+    res.status(500).json({ message: err.message });
   }
-
-  const blog=await Blog.findByIdAndUpdate(req.params.id,update,{new:true});
-  res.json(blog);
 };
 
-/* DELETE */
+/* ================= GET BLOGS ================= */
+exports.getBlogs = async (req, res) => {
+  try {
+    const blogs = await Blog.find().sort({ createdAt: -1 });
 
-exports.deleteBlog = async(req,res)=>{
-  await Blog.findByIdAndDelete(req.params.id);
-  res.json({message:"Deleted"});
+    console.log("BLOGS FETCHED:", blogs.length);
+
+    res.json(blogs);
+  } catch (err) {
+    console.error("GET BLOG ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/* ================= UPDATE ================= */
+exports.updateBlog = async (req, res) => {
+  try {
+    const update = {
+      title: req.body.title,
+      description: req.body.description
+    };
+
+    if (req.file) {
+      update.image = `/uploads/${req.file.filename}`;
+    }
+
+    const blog = await Blog.findByIdAndUpdate(
+      req.params.id,
+      update,
+      { new: true }
+    );
+
+    res.json(blog);
+
+  } catch (err) {
+    console.error("UPDATE ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/* ================= DELETE ================= */
+exports.deleteBlog = async (req, res) => {
+  try {
+    await Blog.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    console.error("DELETE ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/* ================= BULK DELETE BLOGS ================= */
+exports.bulkDeleteBlogs = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: "Invalid blog IDs format" });
+    }
+
+    const result = await Blog.deleteMany({ _id: { $in: ids } });
+    
+    res.json({ 
+      message: `Successfully deleted ${result.deletedCount} blogs`,
+      deletedCount: result.deletedCount 
+    });
+
+  } catch (err) {
+    console.error("BULK DELETE ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
 };
