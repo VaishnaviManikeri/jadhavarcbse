@@ -1,19 +1,10 @@
 const router = require("express").Router();
 const multer = require("multer");
-const path = require("path");
 const controller = require("../controllers/blogController");
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../uploads"));
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
-
+// MEMORY STORAGE (IMPORTANT)
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }
 });
 
