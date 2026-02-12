@@ -9,21 +9,11 @@ dotenv.config();
 
 const app = express();
 
-// IMPORTANT: Create uploads directory with absolute path BEFORE starting the server
+// Create uploads directory with absolute path
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
   console.log("✅ Uploads directory created at:", uploadsDir);
-} else {
-  console.log("✅ Uploads directory already exists at:", uploadsDir);
-}
-
-// Set proper permissions for uploads directory
-try {
-  fs.chmodSync(uploadsDir, 0o755);
-  console.log("✅ Uploads directory permissions set");
-} catch (err) {
-  console.error("❌ Failed to set permissions:", err);
 }
 
 /* =========================
@@ -79,32 +69,11 @@ app.use("/api/blogs", require("./routes/blogs"));
    ERROR HANDLING
 ========================= */
 
-// 404 handler
-app.use((req, res) => {
-  console.log(`404 - Route not found: ${req.method} ${req.url}`);
-  res.status(404).json({ message: "Route not found" });
-});
-
-// Global error handler
 app.use((err, req, res, next) => {
-  console.error("Global error handler:", {
-    message: err.message,
-    stack: err.stack,
-    url: req.url,
-    method: req.method
-  });
-  
-  // Handle multer errors
-  if (err.code === 'LIMIT_FILE_SIZE') {
-    return res.status(400).json({ message: "File too large. Max size: 5MB" });
-  }
-  if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-    return res.status(400).json({ message: "Unexpected file field" });
-  }
-  
+  console.error("Global error handler:", err);
   res.status(500).json({ 
     message: err.message || "Something went wrong!",
-    error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    error: process.env.NODE_ENV === 'development' ? err.stack : {}
   });
 });
 
