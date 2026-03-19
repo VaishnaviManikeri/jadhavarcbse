@@ -1,3 +1,4 @@
+add in this code and write full correct code :
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -9,10 +10,7 @@ dotenv.config();
 
 const app = express();
 
-/* =========================
-   CREATE UPLOADS DIRECTORY
-========================= */
-
+// Create uploads directory with absolute path
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
@@ -25,11 +23,7 @@ if (!fs.existsSync(uploadsDir)) {
 
 app.use(
   cors({
-    origin: [
-      "https://jadhavarcbse.com",
-      "http://localhost:3000",
-      "https://jadhavarcbse.onrender.com",
-    ],
+    origin: ["https://jadhavarcbse.com", "http://localhost:3000", "https://jadhavarcbse.onrender.com"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
@@ -42,7 +36,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files
+// Serve static files with correct path
 app.use("/uploads", express.static(uploadsDir));
 
 /* =========================
@@ -54,22 +48,11 @@ app.get("/", (req, res) => {
 });
 
 /* =========================
-   ✅ PING ROUTE (IMPORTANT)
-========================= */
-
-app.get("/ping", (req, res) => {
-  res.status(200).send("✅ Server is alive");
-});
-
-/* =========================
    DATABASE
 ========================= */
 
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
@@ -89,9 +72,9 @@ app.use("/api/blogs", require("./routes/blogs"));
 
 app.use((err, req, res, next) => {
   console.error("Global error handler:", err);
-  res.status(500).json({
+  res.status(500).json({ 
     message: err.message || "Something went wrong!",
-    error: process.env.NODE_ENV === "development" ? err.stack : {},
+    error: process.env.NODE_ENV === 'development' ? err.stack : {}
   });
 });
 
