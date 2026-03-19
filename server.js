@@ -1,4 +1,3 @@
-
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -45,6 +44,14 @@ app.use("/uploads", express.static(uploadsDir));
 
 app.get("/", (req, res) => {
   res.send("🚀 Backend running successfully");
+});
+
+/* =========================
+   ✅ PING ROUTE (ADDED)
+========================= */
+
+app.get("/ping", (req, res) => {
+  res.send("✅ Server is alive");
 });
 
 /* =========================
