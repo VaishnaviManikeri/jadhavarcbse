@@ -1,4 +1,4 @@
-add in this code and write full correct code :
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
