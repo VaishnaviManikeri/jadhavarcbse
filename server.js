@@ -9,7 +9,10 @@ dotenv.config();
 
 const app = express();
 
-// Create uploads directory with absolute path
+/* =========================
+   CREATE UPLOADS DIRECTORY
+========================= */
+
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
@@ -20,14 +23,25 @@ if (!fs.existsSync(uploadsDir)) {
    CORS CONFIGURATION
 ========================= */
 
+const allowedOrigins = [
+  "https://jadhavarcbse.com",
+  "https://www.jadhavarcbse.com",
+  "http://localhost:3000",
+  process.env.FRONTEND_URL // dynamic support
+];
+
 app.use(
   cors({
-    origin: [
-      "https://jadhavarcbse.com",
-      "https://www.jadhavarcbse.com",
-      "http://localhost:3000",
-    
-    ],
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps, Postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("CORS not allowed"), false);
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
@@ -40,7 +54,10 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files with correct path
+/* =========================
+   STATIC FILES
+========================= */
+
 app.use("/uploads", express.static(uploadsDir));
 
 /* =========================
@@ -76,9 +93,9 @@ app.use("/api/blogs", require("./routes/blogs"));
 
 app.use((err, req, res, next) => {
   console.error("Global error handler:", err);
-  res.status(500).json({ 
+  res.status(500).json({
     message: err.message || "Something went wrong!",
-    error: process.env.NODE_ENV === 'development' ? err.stack : {}
+    error: process.env.NODE_ENV === "development" ? err.stack : {}
   });
 });
 
@@ -88,7 +105,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📁 Uploads directory: ${uploadsDir}`);
 });
