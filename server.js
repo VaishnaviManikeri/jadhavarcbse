@@ -22,7 +22,12 @@ if (!fs.existsSync(uploadsDir)) {
 
 app.use(
   cors({
-    origin: ["https://jadhavarcbse.com","https://www.jadhavarcbse.com", "http://localhost:3000", "https://jadhavarcbse.onrender.com"],
+    origin: [
+      "https://jadhavarcbse.com",
+      "https://www.jadhavarcbse.com",
+      "http://localhost:3000",
+      "https://jadhavarcbse.onrender.com"
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
@@ -44,14 +49,6 @@ app.use("/uploads", express.static(uploadsDir));
 
 app.get("/", (req, res) => {
   res.send("🚀 Backend running successfully");
-});
-
-/* =========================
-   ✅ PING ROUTE (ADDED)
-========================= */
-
-app.get("/ping", (req, res) => {
-  res.send("✅ Server is alive");
 });
 
 /* =========================
