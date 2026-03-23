@@ -26,7 +26,7 @@ app.use(
       "https://jadhavarcbse.com",
       "https://www.jadhavarcbse.com",
       "http://localhost:3000",
-      "https://jadhavarcbse.onrender.com"
+    
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
