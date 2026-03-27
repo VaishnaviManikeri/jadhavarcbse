@@ -26,7 +26,7 @@ if (!fs.existsSync(uploadsDir)) {
 const allowedOrigins = [
   "https://jadhavarcbse.com",
   "https://www.jadhavarcbse.com",
-  "http://localhost:5000",
+  "http://localhost:5173",
   process.env.FRONTEND_URL,
 ];
 
