@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const cors = require("cors");
+ const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
 const fs = require("fs");
@@ -26,7 +26,7 @@ if (!fs.existsSync(uploadsDir)) {
 const allowedOrigins = [
   "https://jadhavarcbse.com",
   "https://www.jadhavarcbse.com",
-  "http://localhost:3000",
+  "http://localhost:5000",
   process.env.FRONTEND_URL,
 ];
 
