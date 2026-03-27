@@ -20,27 +20,25 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 /* =========================
-   CORS CONFIGURATION
+   CORS CONFIGURATION (simplified)
 ========================= */
 
 const allowedOrigins = [
   "https://jadhavarcbse.com",
   "https://www.jadhavarcbse.com",
   "http://localhost:3000",
-  process.env.FRONTEND_URL // dynamic support
+  process.env.FRONTEND_URL,
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps, Postman)
+      // Allow requests with no origin (like Postman or curl)
       if (!origin) return callback(null, true);
-
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
-      } else {
-        return callback(new Error("CORS not allowed"), false);
       }
+      return callback(new Error("CORS not allowed by this server"), false);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
@@ -95,7 +93,7 @@ app.use((err, req, res, next) => {
   console.error("Global error handler:", err);
   res.status(500).json({
     message: err.message || "Something went wrong!",
-    error: process.env.NODE_ENV === "development" ? err.stack : {}
+    error: process.env.NODE_ENV === "development" ? err.stack : {},
   });
 });
 
