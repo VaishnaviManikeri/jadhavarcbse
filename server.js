@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
- const cors = require("cors");
+const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
 const fs = require("fs");
@@ -20,7 +20,7 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 /* =========================
-   CORS CONFIGURATION (simplified)
+   CORS CONFIGURATION
 ========================= */
 
 const allowedOrigins = [
@@ -33,11 +33,12 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like Postman or curl)
       if (!origin) return callback(null, true);
+
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
+
       return callback(new Error("CORS not allowed by this server"), false);
     },
     credentials: true,
@@ -63,7 +64,19 @@ app.use("/uploads", express.static(uploadsDir));
 ========================= */
 
 app.get("/", (req, res) => {
-  res.send("🚀 Backend running successfully");
+  res.send("🚀 Backend running successfully on port 5012");
+});
+
+/* =========================
+   HEALTH CHECK API (FOR HOSTINGER)
+========================= */
+
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "Backend is running perfectly 🚀",
+    serverTime: new Date(),
+  });
 });
 
 /* =========================
@@ -101,7 +114,7 @@ app.use((err, req, res, next) => {
    SERVER
 ========================= */
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5012; // ✅ UPDATED PORT
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
