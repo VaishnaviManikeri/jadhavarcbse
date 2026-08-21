@@ -97,7 +97,8 @@ app.use("/api/gallery", require("./routes/gallery"));
 app.use("/api/announcements", require("./routes/announcements"));
 app.use("/api/careers", require("./routes/careers"));
 app.use("/api/blogs", require("./routes/blogs"));
-
+// Add video routes
+app.use("/api/videos", require("./routes/videos"));
 /* =========================
    ERROR HANDLING
 ========================= */
