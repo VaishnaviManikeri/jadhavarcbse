@@ -14,16 +14,27 @@ const videoSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  thumbnailUrl: {
-    type: String
+  thumbnail: {
+    type: String,
+    default: ''
   },
   videoType: {
     type: String,
-    enum: ['upload', 'url'],
-    default: 'url'
+    enum: ['upload', 'youtube', 'vimeo', 'other'],
+    default: 'upload'
+  },
+  category: {
+    type: String,
+    enum: ['academic', 'sports', 'cultural', 'events', 'general'],
+    default: 'general'
   },
   duration: {
-    type: String
+    type: String,
+    default: ''
+  },
+  uploadedAt: {
+    type: Date,
+    default: Date.now
   },
   views: {
     type: Number,
@@ -33,20 +44,17 @@ const videoSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
+  order: {
+    type: Number,
+    default: 0
   }
+}, {
+  timestamps: true
 });
 
-// Update timestamp on save
-videoSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
+// Add index for better query performance
+videoSchema.index({ title: 'text' });
+videoSchema.index({ category: 1 });
+videoSchema.index({ uploadedAt: -1 });
 
 module.exports = mongoose.model('Video', videoSchema);

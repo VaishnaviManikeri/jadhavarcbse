@@ -14,9 +14,16 @@ const app = express();
 ========================= */
 
 const uploadsDir = path.join(__dirname, "uploads");
+const videosDir = path.join(__dirname, "uploads/videos");
+
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
   console.log("✅ Uploads directory created at:", uploadsDir);
+}
+
+if (!fs.existsSync(videosDir)) {
+  fs.mkdirSync(videosDir, { recursive: true });
+  console.log("✅ Videos directory created at:", videosDir);
 }
 
 /* =========================
@@ -58,6 +65,7 @@ app.use(express.urlencoded({ extended: true }));
 ========================= */
 
 app.use("/uploads", express.static(uploadsDir));
+app.use("/uploads/videos", express.static(videosDir));
 
 /* =========================
    ROOT ROUTE
@@ -97,8 +105,8 @@ app.use("/api/gallery", require("./routes/gallery"));
 app.use("/api/announcements", require("./routes/announcements"));
 app.use("/api/careers", require("./routes/careers"));
 app.use("/api/blogs", require("./routes/blogs"));
-// Add video routes
-app.use("/api/videos", require("./routes/videos"));
+app.use("/api/videos", require("./routes/videos")); // ✅ Video routes added
+
 /* =========================
    ERROR HANDLING
 ========================= */
@@ -120,4 +128,5 @@ const PORT = 5012; // ✅ UPDATED PORT
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📁 Uploads directory: ${uploadsDir}`);
+  console.log(`📁 Videos directory: ${videosDir}`);
 });
