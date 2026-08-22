@@ -76,6 +76,13 @@ exports.createVideo = async (req, res) => {
     await newVideo.save();
     res.status(201).json(newVideo);
   } catch (error) {
+    if (req.file?.path) {
+      fs.unlink(req.file.path, (unlinkErr) => {
+        if (unlinkErr && unlinkErr.code !== "ENOENT") {
+          console.error("Error cleaning up failed video upload:", unlinkErr);
+        }
+      });
+    }
     console.error("Create video error:", error);
     res.status(500).json({ message: "Failed to create video" });
   }
