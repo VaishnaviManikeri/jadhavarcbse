@@ -14,16 +14,9 @@ const app = express();
 ========================= */
 
 const uploadsDir = path.join(__dirname, "uploads");
-const videosDir = path.join(__dirname, "uploads/videos");
-
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
   console.log("✅ Uploads directory created at:", uploadsDir);
-}
-
-if (!fs.existsSync(videosDir)) {
-  fs.mkdirSync(videosDir, { recursive: true });
-  console.log("✅ Videos directory created at:", videosDir);
 }
 
 /* =========================
@@ -65,7 +58,6 @@ app.use(express.urlencoded({ extended: true }));
 ========================= */
 
 app.use("/uploads", express.static(uploadsDir));
-app.use("/uploads/videos", express.static(videosDir));
 
 /* =========================
    ROOT ROUTE
@@ -105,7 +97,7 @@ app.use("/api/gallery", require("./routes/gallery"));
 app.use("/api/announcements", require("./routes/announcements"));
 app.use("/api/careers", require("./routes/careers"));
 app.use("/api/blogs", require("./routes/blogs"));
-app.use("/api/videos", require("./routes/videos")); // ✅ Video routes added
+app.use("/api/videos", require("./routes/video"));
 
 /* =========================
    ERROR HANDLING
@@ -125,8 +117,13 @@ app.use((err, req, res, next) => {
 
 const PORT = 5012; // ✅ UPDATED PORT
 
-app.listen(PORT, "0.0.0.0", () => {
+const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📁 Uploads directory: ${uploadsDir}`);
-  console.log(`📁 Videos directory: ${videosDir}`);
 });
+
+// Large video uploads over a slow connection can take a while.
+// Bump Node's own request timeouts so big uploads aren't killed mid-stream.
+// (You still need matching settings on nginx — see the notes we discussed.)
+server.requestTimeout = 30 * 60 * 1000; // 30 minutes
+server.headersTimeout = 30 * 60 * 1000 + 1000;
