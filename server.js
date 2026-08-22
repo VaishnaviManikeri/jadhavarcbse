@@ -26,9 +26,11 @@ if (!fs.existsSync(uploadsDir)) {
 const allowedOrigins = [
   "https://jadhavarcbse.com",
   "https://www.jadhavarcbse.com",
+  "https://jadhavarinternationalschool.com",
+  "https://www.jadhavarinternationalschool.com",
   "http://localhost:5173",
   process.env.FRONTEND_URL,
-];
+].filter(Boolean);
 
 app.use(
   cors({
@@ -42,7 +44,7 @@ app.use(
       return callback(new Error("CORS not allowed by this server"), false);
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
 
@@ -115,7 +117,7 @@ app.use((err, req, res, next) => {
    SERVER
 ========================= */
 
-const PORT = 5012; // ✅ UPDATED PORT
+const PORT = Number(process.env.PORT) || 5012;
 
 const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);

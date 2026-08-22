@@ -53,6 +53,10 @@ exports.createVideo = async (req, res) => {
       return res.status(400).json({ message: "Title and videoType are required" });
     }
 
+    if (!["url", "upload"].includes(videoType)) {
+      return res.status(400).json({ message: "videoType must be 'url' or 'upload'" });
+    }
+
     if (videoType === "url" && !videoUrl) {
       return res.status(400).json({ message: "videoUrl is required when videoType is 'url'" });
     }
@@ -86,6 +90,10 @@ exports.updateVideo = async (req, res) => {
     if (!video) return res.status(404).json({ message: "Video not found" });
 
     const { title, description, videoType, videoUrl } = req.body;
+
+    if (videoType !== undefined && !["url", "upload"].includes(videoType)) {
+      return res.status(400).json({ message: "videoType must be 'url' or 'upload'" });
+    }
 
     if (title !== undefined) video.title = title;
     if (description !== undefined) video.description = description;
