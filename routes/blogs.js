@@ -2,6 +2,7 @@ const router = require("express").Router();
 const multer = require("multer");
 const path = require("path");
 const controller = require("../controllers/blogController");
+const authMiddleware = require("../middleware/auth");
 
 const storage = multer.diskStorage({
   destination: "uploads",
@@ -14,6 +15,10 @@ const upload = multer({ storage });
 
 // Single blog routes
 router.get("/", controller.getBlogs);
+
+// All blog changes require an authenticated admin token.
+router.use(authMiddleware);
+
 router.post("/", upload.single("image"), controller.createBlog);
 router.put("/:id", upload.single("image"), controller.updateBlog);
 router.delete("/:id", controller.deleteBlog);
