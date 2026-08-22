@@ -15,6 +15,7 @@ const upload = multer({ storage });
 
 // Single blog routes
 router.get("/", controller.getBlogs);
+router.get("/:slug", controller.getBlogBySlug);
 
 // All blog changes require an authenticated admin token.
 router.use(authMiddleware);
