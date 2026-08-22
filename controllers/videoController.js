@@ -1,6 +1,9 @@
 const fs = require("fs");
 const path = require("path");
+const mongoose = require("mongoose");
 const Video = require("../models/Video");
+
+const hasValidVideoId = (id) => mongoose.isValidObjectId(id);
 
 // Helper to safely delete an uploaded video file from disk
 const deleteFileIfExists = (relativePath) => {
@@ -33,6 +36,10 @@ exports.getVideos = async (req, res) => {
 // @access Public
 exports.getVideoById = async (req, res) => {
   try {
+    if (!hasValidVideoId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid video ID" });
+    }
+
     const video = await Video.findById(req.params.id);
     if (!video) return res.status(404).json({ message: "Video not found" });
     res.status(200).json(video);
@@ -93,6 +100,10 @@ exports.createVideo = async (req, res) => {
 // @access Private (admin)
 exports.updateVideo = async (req, res) => {
   try {
+    if (!hasValidVideoId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid video ID" });
+    }
+
     const video = await Video.findById(req.params.id);
     if (!video) return res.status(404).json({ message: "Video not found" });
 
@@ -134,6 +145,10 @@ exports.updateVideo = async (req, res) => {
 // @access Private (admin)
 exports.deleteVideo = async (req, res) => {
   try {
+    if (!hasValidVideoId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid video ID" });
+    }
+
     const video = await Video.findById(req.params.id);
     if (!video) return res.status(404).json({ message: "Video not found" });
 
